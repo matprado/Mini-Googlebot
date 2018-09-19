@@ -1,0 +1,2 @@
+0001,YouTube,900,https://www.youtube.com/,youtube,videos,online
+0002,Netflix,800, https://www.netflix.com/br/,netflix,videos,streaming
