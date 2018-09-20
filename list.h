@@ -16,5 +16,6 @@ int list_size(LIST *L);
 void print_list(LIST *L);
 int list_remove(LIST *L, int code);
 SITE *list_search(LIST *L, int code);
+int code_found(LIST *L, int code);
 
 #endif

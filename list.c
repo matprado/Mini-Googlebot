@@ -56,7 +56,7 @@ void delete_node(NODE *N){
 LIST* scan_file(FILE* fp, int n_lines){
 	LIST *L = create_list(); 
 	SITE *S;
-	printf("linhas = %d\n", n_lines);
+	//printf("linhas = %d\n", n_lines);
 	while(L->size < n_lines){
 		S = read_file_sites(fp);
 		if(list_insertion(L, S)) printf("NOVO SITE INSERIDO COM SUCESSO...\n");
@@ -64,23 +64,42 @@ LIST* scan_file(FILE* fp, int n_lines){
 	return L; //retorna a lista
 }
 
-int list_insertion(LIST *L, SITE *S){ 			/* DEPOIS TROCAR PARA INSERÇÃO COM ORDENAÇÃO*/
-	if(L == NULL || S == NULL) return ERROR;
-	NODE *aux = (NODE *) malloc(sizeof(NODE));
-	if(aux != NULL){
-		aux->site = S;
-		aux->next = NULL;
-		/*CASO DE PRIMEIRO ELEMENTO*/
-		if(empty_list(L)){
-			L->start = aux;
-		}else{ /*CASO DE QUALQUER ELEMENTO QUE NÃO O PRIMEIRO*/
-			L->end->next = aux;
+int list_insertion(LIST *L, SITE *S){ 
+ 	if(L == NULL || S == NULL) return 0;
+	NODE *new = (NODE *) malloc(sizeof(NODE)), *search = NULL, *previous = NULL;	
+	/*
+	search -> nó posicionado onde deveria estar o new;
+	previous -> nó anterior à search		
+	new -> novo nó a ser inserido entre o previous e o search; 
+	*/
+	if(new != NULL){
+		new->site = S;
+		new->next = NULL;
+		if(empty_list(L)){ /*LISTA VAZIA*/
+			L->start = new;
+			L->end = new;
+		}else{
+			search = L->start;
+			while((search != NULL) && (site_code(search->site) < site_code(new->site))){
+				previous = search;
+				search = search->next; /* previous recebe o nó anterior de search*/
+			}
+			if(search == L->start){ //CASO PARTICULAR: inserir como primeiro elemento
+				new->next = search;
+				L->start = new;
+			}else if(search == NULL){ //CASO PARTICULAR: inserir como último elemento
+				previous->next = new;
+				L->end = new;
+			}else{
+				new->next = previous->next;
+				previous->next = new;
+			}
 		}
-		L->end = aux;
 		L->size++;
-		return 1; /*SUCESSO*/
- 	}
-	return 0; /*FALHA*/
+		return 1;
+	}
+	return 0;
+
 }
 
 int empty_list(LIST *L){
@@ -140,4 +159,16 @@ SITE *list_search(LIST *L, int code){
 		}
 	}
 	return NULL; //Erro de não achar um site com o código dado
+}
+
+int code_found(LIST *L, int code){
+	if(L == NULL) return 0;
+	NODE *aux = L->start;
+	while(aux != NULL){
+		if(code == site_code(aux->site)){
+			return 1;
+		}			
+		aux = aux->next;		
+	}
+	return 0;
 }

@@ -50,30 +50,36 @@ void print_site(SITE *S){
 		printf("Palavra-chave %d: %s\n", i+1,S->keywords[i]);
 	}
 	printf("-----------------------------------------------------\n");
-	printf("\n");
 }
 
-SITE *read_new_site(){
+SITE *read_new_site(int code){
 	SITE *new = create_site();
+	new->code = code;
 	char c;
-	printf("Digite os seguintes elementos do novo site:\n");
-	printf("Código = ");
-	scanf("%d", &new->code);
 	c = getchar();
-	printf("Nome = ");
+	printf("Nome(string) = ");
 	scanf("%[^\n]", new->name);
 	c = getchar();
-	printf("Relevância = ");
+	printf("Relevância(int) = ");
 	scanf("%d", &new->relevance);
+	if(new->relevance < 0 || new->relevance > 1000){
+		printf("ERRO --> número inválido para relevancia(0-1000).\n");
+		new->relevance = 0;
+	}
 	c = getchar();
-	printf("Link = ");
+	printf("Link(string) = ");
 	scanf("%[^\n]", new->link);
 	c = getchar();
-	printf("Quantas palavras chave? ");
+	printf("Quantas palavras chave?(int) ");
 	scanf("%d", &new->n_key);
-	c = getchar();	
+	if(new->n_key < 0 || new->n_key > 10){
+		printf("ERRO --> número inválido de palavras-chave(0-10).\n");
+		new->n_key = 0;
+		return new;
+	}
+	c = getchar();
 	for(int i=0; i<new->n_key; i++){
-		printf("Palavra-chave %d = ", i+1);
+		printf("Palavra-chave(string) número %d = ", i+1);
 		scanf("%s", new->keywords[i]);
 		c = getchar();
 	}
@@ -90,7 +96,7 @@ int new_keyword(SITE *S){
 		printf("ERRO --> Site não encontrado.\n");
 		return 0;
 	}
-	if(S->n_key == 10){
+	if(S->n_key >= 10){
 		printf("ERRO --> Número máximo de palavras-chave atingido.\n");
 		return 0;
 	}
@@ -105,6 +111,12 @@ int change_relevance(SITE *S){
 		return 0;
 	}
 	printf("Digite a nova relevancia = ");
-	scanf("%d", &S->relevance);
+	int r;
+	scanf("%d", &r);
+	if(r < 0 || r > 1000){
+		printf("ERRO --> número inválido para relevancia(0-1000).\n");
+		return 0;
+	}
+	S->relevance = r;
 	return 1;
 }

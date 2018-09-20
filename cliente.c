@@ -32,8 +32,15 @@ void print_menu(){
 }
 
 void insert_site(LIST *L){
-	printf("Você escolheu inserir um site.\n");	
-	if(list_insertion(L, read_new_site())) printf("Site inserido com sucesso!\n");
+	printf("Você escolheu inserir um site.\n");
+	printf("Digite os seguintes elementos do novo site:\n");
+	printf("Código(int) = ");
+	int code;
+	scanf("%d", &code);
+	if(code_found(L, code)){
+		printf("ERRO --> código digitado já existe\n");
+	}	
+	else if(list_insertion(L, read_new_site(code))) printf("Site inserido com sucesso!\n");
 }
 
 void remove_site(LIST *L){
@@ -41,7 +48,10 @@ void remove_site(LIST *L){
 	printf("Digite o código do site a ser removido: ");
 	int code;
 	scanf("%d", &code);
-	if(list_remove(L, code)) printf("Site removido com sucesso!\n");
+	if(!code_found(L, code)){
+		printf("ERRO --> site com este código não exite.\n");
+	}
+	else if(list_remove(L, code)) printf("Site removido com sucesso!\n");
 }
 
 void insert_keyword(LIST *L){
@@ -97,6 +107,6 @@ int main(void){
 	printf("Liberando dados e fechando arquivo...\n");
 	delete_list(L);
 	fclose(fp);
-	printf("FIM DA EXECUÇÃO.");
+	printf("FIM DA EXECUÇÃO.\n");
 	return 0;
 }
