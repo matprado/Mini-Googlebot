@@ -1,15 +1,15 @@
 #ifndef LIST_H
 #define LIST_H
-#include <stdio.h> //tive que colocar a stdio aqui por causa do parametro "FILE*"
+#include <stdio.h>
 #include "site.h"
 
-typedef struct list LIST; //struct da lista de sites
+typedef struct list LIST;
 typedef struct node NODE;
 
-LIST* create_list(void); //funcao que cria a lista para armazenar os sites
+LIST* create_list(void);
 void delete_list(LIST *L);
 void delete_node(NODE *N);
-LIST* scan_file(FILE* fp, int n_lines); //funcao que escaneia o arquivo, recebe o arquivo e o numero de linhas dele
+LIST* scan_file(FILE* fp, int n_lines);
 int list_insertion(LIST *L, SITE *S);
 int empty_list(LIST *L);
 int list_size(LIST *L);
@@ -17,5 +17,6 @@ void print_list(LIST *L);
 int list_remove(LIST *L, int code);
 SITE *list_search(LIST *L, int code);
 int code_found(LIST *L, int code);
+void update_file(FILE *fp, LIST *L);
 
 #endif

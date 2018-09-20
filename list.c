@@ -4,11 +4,10 @@
 #define ERROR 505
 #define DEBUG 0
 
-//lista de sites, contem um site no inicio e um no final e o tamanho
+//Lista Encadeada Ordenada
 struct list{	
-	NODE *start; //primeiro
-	NODE *end; //ultimo
-	int size; //tamanho da lista	
+	NODE *start; //Começo da lista
+	int size; //Tamanho da lista	
 };
 
 struct node{
@@ -16,35 +15,45 @@ struct node{
 	NODE *next;
 };
 
-//funcao que cria uma lista e retorna essa
+
+/*Função create_list:
+ Aloca e retorna um ponteiro para a nova lista;
+@Retorno:
+-Se bem sucedida, retorna o ponteiro da nova lista criada. Caso contrário, retorna NULL;*/
 LIST *create_list(void){
 	LIST *L; //declarado um ponteiro para lista
 	L = (LIST *) malloc(sizeof(LIST)); //alocando a lista na heap
 	//se alocou, entra
 	if(L != NULL){
 		L->start = NULL; //nenhum item no comeco da lista
-		L->end = NULL; //nenhum item no final da lista
 		L->size = 0; //portanto, lista vazia
 	}	
 	return(L);//retorna a lista vazia	
 }
 
+
+/*Função delete_list:
+ Libera todos os nós de uma lista e, por último, a própria lista;
+@Parâmetros:
+-Um ponteiro para a lista a ser removida;*/
 void delete_list(LIST *L){
 	if(L != NULL && !empty_list(L)){
    		NODE *N = L->start, *aux;
-    	while(N != L->end){
+    	while(N != NULL){
        	 	aux = N;
        	 	N = N->next;
         	delete_node(aux);
         }
-    	delete_node(N); //Deleta o último nó
     	L->start = NULL;
-    	L->end = NULL;
-		free(L);
+    	free(L);
 		L = NULL;
 	}
 }
 
+/*Função delete_node:
+ Libera o conteúdo de um nó e, posteriormente, o próprio nó;
+@Parâmetros:
+-Um nó;*/
 void delete_node(NODE *N){
 	if(N != NULL){
 		free(N->site);
@@ -53,10 +62,15 @@ void delete_node(NODE *N){
 	}
 }
 
+/*Função scan_file:
+ Lê todas as informações de um arquivo e as armazena em uma lista;
+@Parâmetros:
+-Um ponteiro para o arquivo de leitura e a quantidade de linhas do arquivo;
+@Retorno:
+-Retorna um ponteiro para a nova lista;*/
 LIST* scan_file(FILE* fp, int n_lines){
 	LIST *L = create_list(); 
 	SITE *S;
-	//printf("linhas = %d\n", n_lines);
 	while(L->size < n_lines){
 		S = read_file_sites(fp);
 		if(list_insertion(L, S)) printf("NOVO SITE INSERIDO COM SUCESSO...\n");
@@ -64,33 +78,34 @@ LIST* scan_file(FILE* fp, int n_lines){
 	return L; //retorna a lista
 }
 
+/*Função list_insertion:
+ Insere um novo śite em uma lista;
+@Parâmetros:
+-Ponteiros para a lista e para o site;
+@Retorno:
+-Se bem sucedida, retorna 1. Caso contrário, retorna 0;*/
 int list_insertion(LIST *L, SITE *S){ 
  	if(L == NULL || S == NULL) return 0;
-	NODE *new = (NODE *) malloc(sizeof(NODE)), *search = NULL, *previous = NULL;	
-	/*
+	NODE *new = (NODE *) malloc(sizeof(NODE)), *search = NULL, *previous = NULL;		/*
 	search -> nó posicionado onde deveria estar o new;
 	previous -> nó anterior à search		
-	new -> novo nó a ser inserido entre o previous e o search; 
-	*/
+	new -> novo nó a ser inserido entre o previous e o search; */
 	if(new != NULL){
 		new->site = S;
 		new->next = NULL;
 		if(empty_list(L)){ /*LISTA VAZIA*/
 			L->start = new;
-			L->end = new;
 		}else{
 			search = L->start;
 			while((search != NULL) && (site_code(search->site) < site_code(new->site))){
 				previous = search;
-				search = search->next; /* previous recebe o nó anterior de search*/
+				search = search->next; /*previous recebe o nó anterior de search*/
 			}
 			if(search == L->start){ //CASO PARTICULAR: inserir como primeiro elemento
 				new->next = search;
 				L->start = new;
-			}else if(search == NULL){ //CASO PARTICULAR: inserir como último elemento
-				previous->next = new;
-				L->end = new;
-			}else{
+			}
+			else{
 				new->next = previous->next;
 				previous->next = new;
 			}
@@ -99,30 +114,41 @@ int list_insertion(LIST *L, SITE *S){
 		return 1;
 	}
 	return 0;
-
 }
 
+/*Função empty_list:
+ Verifica se uma lista está vazia;
+@Parâmetros:
+-Um ponteiro para lista;
+@Retorno:
+-Se a lista estiver vazia, retorna 1. Caso contrário, retorna 0;*/
 int empty_list(LIST *L){
 	if(L != NULL && L->start == NULL) return 1;
  	return 0;
 }
 
-int list_size(LIST *L){
-	return (L != NULL ? L->size : ERROR);
-}
-
+/*Função print_list:
+ Imprime todos os elementos da lista;
+@Parâmetros:
+-Um ponteiro para a lista a ser imprimida;
+*/
 void print_list(LIST *L){
 	NODE *aux = NULL;
 	if(L != NULL && !empty_list(L)){
 		aux = L->start;
-		while(aux != L->end){			
+		while(aux != NULL){			
 			print_site(aux->site);
 			aux = aux->next;
 		}
-		print_site(aux->site); /*Imprime o último site da lista*/
 	}		
 }
 
+/*Função list_remove:
+ Remove um nó de uma lista que contém um site com o código dado;
+@Parâmetros:
+-Ponteiro para lista e um código;
+@Retorno:
+-Se bem sucedida, retorna 1. Caso contrário, retorna 0;*/
 int list_remove(LIST *L, int code){
 	NODE *p, *aux = NULL;
 	if(L != NULL && !empty_list(L)){
@@ -139,9 +165,6 @@ int list_remove(LIST *L, int code){
 				aux->next = p->next;
 				p->next = NULL;
 			}
-			if(p == L->end){ /* Se a chave está no último nó*/
-				L->end = aux;
-			}
 			L->size--;
 			delete_node(p);	
 			return 1;
@@ -150,10 +173,17 @@ int list_remove(LIST *L, int code){
 	return 0;
 }
 
+/*Função list_search:
+ Procura e retorna um site de uma lista baseado em um código dado;
+@Parâmetros:
+-Um ponteiro para lista e um código;
+@Retorno:
+-Se bem sucedida, retorna o site encontrado. Caso contrário, retorna NULL;*/
 SITE *list_search(LIST *L, int code){
 	NODE *aux = L->start;
 	if(L != NULL){
 		while(aux != NULL){
+			if(site_code(aux->site) > code) return NULL;
 			if(site_code(aux->site) == code) return aux->site;
 			aux = aux->next;
 		}
@@ -161,6 +191,12 @@ SITE *list_search(LIST *L, int code){
 	return NULL; //Erro de não achar um site com o código dado
 }
 
+/*Função code_found:
+ Verifica se existe algum site na lista com o mesmo código que o dado;
+@Parâmetros:
+-Um ponteiro para lista e um código;
+@Retorno:
+-Se encontrar um site com o código dado, retorna 1. Caso contrário, retorna 0;*/
 int code_found(LIST *L, int code){
 	if(L == NULL) return 0;
 	NODE *aux = L->start;
@@ -171,4 +207,19 @@ int code_found(LIST *L, int code){
 		aux = aux->next;		
 	}
 	return 0;
+}
+
+/*Função update_file:
+ Escreve em um arquivo todas os sites de uma lista;
+@Parâmetros:
+-Ponteiros para o arquivo e para o site;*/
+void update_file(FILE *fp, LIST *L){
+	NODE *aux = NULL;
+	if(L != NULL && !empty_list(L)){
+		aux = L->start;
+		while(aux != NULL){			
+			save_site(fp, aux->site);
+			aux = aux->next;
+		}
+	}	
 }
