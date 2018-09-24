@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
-#define ERROR 505
-#define DEBUG 0
+#define ERROR -404
 
-//Lista Encadeada Ordenada
+/*ESTRUTURA DE DADOS USADA: Lista Encadeada Ordenada*/
 struct list{	
-	NODE *start; //Começo da lista
-	int size; //Tamanho da lista	
+	NODE *start; /*Começo da lista*/
+	int size; /*Tamanho da lista*/	
 };
 
 struct node{
@@ -21,14 +20,13 @@ struct node{
 @Retorno:
 -Se bem sucedida, retorna o ponteiro da nova lista criada. Caso contrário, retorna NULL;*/
 LIST *create_list(void){
-	LIST *L; //declarado um ponteiro para lista
-	L = (LIST *) malloc(sizeof(LIST)); //alocando a lista na heap
-	//se alocou, entra
+	LIST *L; 
+	L = (LIST *) malloc(sizeof(LIST)); 
 	if(L != NULL){
-		L->start = NULL; //nenhum item no comeco da lista
-		L->size = 0; //portanto, lista vazia
+		L->start = NULL; 
+		L->size = 0; 
 	}	
-	return(L);//retorna a lista vazia	
+	return(L);	
 }
 
 
@@ -75,7 +73,7 @@ LIST* scan_file(FILE* fp, int n_lines){
 		S = read_file_sites(fp);
 		if(list_insertion(L, S)) printf("NOVO SITE INSERIDO COM SUCESSO...\n");
 	}
-	return L; //retorna a lista
+	return L; 
 }
 
 /*Função list_insertion:
@@ -101,7 +99,7 @@ int list_insertion(LIST *L, SITE *S){
 				previous = search;
 				search = search->next; /*previous recebe o nó anterior de search*/
 			}
-			if(search == L->start){ //CASO PARTICULAR: inserir como primeiro elemento
+			if(search == L->start){ /*CASO PARTICULAR: inserir como primeiro elemento*/
 				new->next = search;
 				L->start = new;
 			}
@@ -188,7 +186,7 @@ SITE *list_search(LIST *L, int code){
 			aux = aux->next;
 		}
 	}
-	return NULL; //Erro de não achar um site com o código dado
+	return NULL; /*Erro de não achar um site com o código dado*/
 }
 
 /*Função code_found:

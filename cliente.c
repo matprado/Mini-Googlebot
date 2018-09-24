@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "list.h"
+#include "site.h"
 
 /*Função count_lines:
  Conta o numero de linhas de um arquivo;
@@ -101,17 +102,17 @@ void update_relevance(LIST *L){
 }
 
 int main(void){
-	FILE* fp; //ponteiro para arquivo
-	int n_lines; //variavel que armazena o numero de linhas
+	FILE* fp; /*ponteiro para arquivo*/
+	int n_lines; /*variavel que armazena o numero de linhas do arquivo*/
 	LIST* L = NULL;
-	if((fp = fopen("googlebot.csv", "r")) == NULL){ //abre o arquivo googlebot.txt em modo leitura
+	if((fp = fopen("googlebot.csv", "r")) == NULL){ /*abre o arquivo googlebot.txt em modo leitura*/
 		printf("ERRO AO ABRIR ARQUIVO DE LEITURA.\n");
 		return 0;
 	}
 	printf("Arquivo de leitura aberto...\n");
-	n_lines = count_lines(fp); //conta as linhas
-	rewind(fp); //volta ao inicio do arquivo
-	L = scan_file(fp, n_lines); //le o arquivo
+	n_lines = count_lines(fp); /*conta as linhas*/
+	rewind(fp); /*volta ao inicio do arquivo*/
+	L = scan_file(fp, n_lines); /*le o arquivo*/
 	printf("Arquivo de leitura lido com sucesso...\n");
 	int opc = 0;
 	print_intro();
@@ -129,23 +130,23 @@ int main(void){
 				break;						
 			case 5: printf("Encerrando execução...\n");
 				break;
-			case 6:	print_list(L);
+			case 6:	
+				printf("Você escolheu ver todos os sites:\n");
+				print_list(L);
 				break;		
 			default: printf("ERRO --> OPÇÃO INVÁLIDA.\nPor favor, digite uma das opções apresentadas:\n");
 		}
 	}
 
-	// PARTE DE GUARDAR NO ARQUIVO: FUNCIONA, PORÉM COM ALGUNS BUGS...
-	/*fclose(fp);
-	if((fp = fopen("googlebot.csv", "w+")) == NULL){ //abre o arquivo googlebot.txt em modo escrita
+	/* PARTE DE GUARDAR NO ARQUIVO: FUNCIONA, PORÉM COM ALGUNS BUGS...*/
+	fclose(fp);
+	if((fp = fopen("googlebot.csv", "w+")) == NULL){ /*abre o arquivo googlebot.txt em modo escrita*/
 		printf("ERRO AO ESCREVER NO ARQUIVO DE SAÍDA.\n");
 		return 0;
 	}
 	printf("Armazenando dados no arquivo...\n");
 	update_file(fp, L);
 	printf("Dados armazenados com sucesso!\n");
-	*/
-	
 	printf("Liberando dados e fechando arquivo...\n");
 	delete_list(L);
 	fclose(fp);

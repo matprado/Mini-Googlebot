@@ -2,16 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include "site.h"
-#define DEBUG 1
-
 
 struct site{
-	int code; //codigo
-	char name[51]; //nome
-	int relevance; //relevancia
-	char link[101]; //link
-	char keywords[10][51]; //palavras-chave
-	int n_key; //quantidade de palavras chave
+	int code;  /*codigo*/
+	char name[51]; /*nome*/
+	int relevance; /*relevancia*/
+	char link[101]; /*link*/
+	char keywords[10][51]; /*palavras-chave*/
+	int n_key; /*quantidade de palavras chave*/
 };
 
 /*Função create_site:
@@ -60,7 +58,8 @@ void print_site(SITE *S){
 	printf("Nome: %s\n", S->name);
 	printf("Relevância: %d\n", S->relevance);
 	printf("Link: %s\n", S->link);
-	for(int i=0; i<S->n_key; i++){
+	int i;
+	for(i=0; i<S->n_key; i++){
 		printf("Palavra-chave %d: %s\n", i+1,S->keywords[i]);
 	}
 	printf("------------------------------------------\n");
@@ -75,23 +74,19 @@ void print_site(SITE *S){
 SITE *read_new_site(int code){
 	SITE *new = create_site();
 	new->code = code;
-	char c;
-	c = getchar(); /*OBS: o c existe para pegar os '\n' que sobram do stdin*/
+	char c = getchar(); /*OBS: essa variável c existe para pegar os '\n' que sobram do stdin*/
 	printf("Nome(string) = ");
-	scanf("%[^\n]", new->name);
-	c = getchar();
+	scanf("%[^\n]%c", new->name, &c);
 	printf("Relevância(int) = ");
-	scanf("%d", &new->relevance);
+	scanf("%d%c", &new->relevance, &c);
 	/*Confere se a relevância está no intervalo permitido:*/
 	if(new->relevance < 0 || new->relevance > 1000){
 		printf("ERRO --> número inválido para relevancia(0-1000).\n");
 		printf("Valor de relevância resetado para 0.\n");
 		new->relevance = 0;
 	}
-	c = getchar();
 	printf("Link(string) = ");
-	scanf("%[^\n]", new->link);
-	c = getchar();
+	scanf("%[^\n]%c", new->link, &c);
 	printf("Quantas palavras chave?(int) ");
 	scanf("%d", &new->n_key);
 	/*Confere se a quantidade de palavras-chave está no intervalo permitido:*/
@@ -103,19 +98,10 @@ SITE *read_new_site(int code){
 	}
 	c = getchar();
 	/*Lê cada palavra chave:*/
-	for(int i=0; i<new->n_key; i++){
+	int i;
+	for(i=0; i<new->n_key; i++){
 		printf("Palavra-chave(string) número %d = ", i+1);
-		scanf("%s", new->keywords[i]);
-		// POSSÍVEL SOLUÇÃO PARA PALAVRAS CHAVE IGUAIS:
-		/*for(int j=0; j<i; j++){
-			if(strcmp(new->keywords[i], new->keywords[j]) == 0){
-				printf("ERRO --> Palavra-chave já existe\n");
-				new->n_key = i;
-				printf("Quantidade de palavras-chave ficou em %d.\n", i);
-				return new;
-			}	
-		}*/
-		c = getchar();
+		scanf("%s%c", new->keywords[i], &c);
 	}
 	return new;
 }
@@ -172,10 +158,14 @@ int change_relevance(SITE *S){
 	S->relevance = r;
 	return 1;
 }
-
+/*Função save_site:
+ Salva todas os dados em um arquivo;
+@Parâmetros:
+-Um ponteiro para arquivo e um para site;*/
 void save_site(FILE *fp, SITE *S){
 	fprintf(fp, "%d,%s,%d,%s", S->code, S->name, S->relevance, S->link);
-	for(int i=0; i<S->n_key; i++){
+	int i;
+	for(i=0; i<S->n_key; i++){
 		fprintf(fp, ",%s", S->keywords[i]);
 	}
 	fprintf(fp, "\n");
