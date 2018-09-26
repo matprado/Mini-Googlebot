@@ -137,8 +137,6 @@ int main(void){
 			default: printf("ERRO --> OPÇÃO INVÁLIDA.\nPor favor, digite uma das opções apresentadas:\n");
 		}
 	}
-
-	/* PARTE DE GUARDAR NO ARQUIVO: FUNCIONA, PORÉM COM ALGUNS BUGS...*/
 	fclose(fp);
 	if((fp = fopen("googlebot.csv", "w+")) == NULL){ /*abre o arquivo googlebot.txt em modo escrita*/
 		printf("ERRO AO ESCREVER NO ARQUIVO DE SAÍDA.\n");
