@@ -38,7 +38,6 @@ int read_number(){
 			}	
 		}
 		if(repeat){
-			/*c = getchar();*/
 			printf("ERRO --> ENTRADA INVÁLIDA!\n");
 			printf("Por favor, digite um número inteiro = ");
 		}
@@ -78,8 +77,11 @@ void insert_site(LIST *L){
 	printf("Digite os seguintes elementos do novo site:\n");
 	printf("Código(int) = ");
 	int code = read_number(), relevance;
+	if(code < 0 || code > 9999){
+		printf("ERRO --> código inválido(intervalo aceito = 0-9999)\n");
+	}
 	/*Se achar o código na lista, não insere um novo site;*/
-	if(code_found(L, code)){
+	else if(code_found(L, code)){
 		printf("ERRO --> código digitado já existe\n");
 	}	
 	else{
@@ -98,8 +100,11 @@ void remove_site(LIST *L){
 	printf("Você escolheu remover um site.\n");	
 	printf("Digite o código do site a ser removido: ");
 	int code = read_number();
+	if(code < 0 || code > 9999){
+		printf("ERRO --> código inválido(intervalo aceito = 0-9999)\n");
+	}
 	/*Se não encontrar o código na lista, não remove;*/
-	if(!code_found(L, code)){
+	else if(!code_found(L, code)){
 		printf("ERRO --> site com este código não exite.\n");
 	}
 	else if(list_remove(L, code)) printf("Site removido com sucesso!\n");
@@ -113,7 +118,10 @@ void insert_keyword(LIST *L){
 	printf("Você escolheu inserir uma nova palavra-chave.\n");	
 	printf("Digite o código do site que vai receber a nova palavra-chave: ");
 	int code = read_number();
-	if(new_keyword(list_search(L, code))) printf("Palavra-chave adicionada com sucesso!\n");;		
+	if(code < 0 || code > 9999){
+		printf("ERRO --> código inválido(intervalo aceito = 0-9999)\n");
+	}
+	else if(new_keyword(list_search(L, code))) printf("Palavra-chave adicionada com sucesso!\n");;		
 }
 
 /*Função update_relevance:
@@ -124,9 +132,13 @@ void update_relevance(LIST *L){
 	printf("Você escolheu atualizar a relevância de um site.\n");	
 	printf("Digite o código do site que vai ter a relevância atualizada: ");
 	int code = read_number();
-	printf("Digite a nova relevancia = ");
-	int relevance = read_number();
-	if(change_relevance(list_search(L, code), relevance)) printf("Relevância atualizada com sucesso!\n"); 	
+	if(code < 0 || code > 9999){
+		printf("ERRO --> código inválido(intervalo aceito = 0-9999)\n");
+	}else{
+		printf("Digite a nova relevancia = ");
+		int relevance = read_number();
+		if(change_relevance(list_search(L, code), relevance)) printf("Relevância atualizada com sucesso!\n"); 	
+	}	
 }
 
 int main(void){
