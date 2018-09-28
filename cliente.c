@@ -26,9 +26,13 @@ int count_lines(FILE* file){
  -O número inteiro lido*/
 int read_number(){
 	char input[1000], c;
+	input[0] = '\0';
 	int i, repeat, size, num=0;
 	do{
-		scanf("%[^\n]%c", input, &c);
+		scanf("%[^\n]", input);
+		if(input[0] != '\n'){
+			scanf("%c", &c);
+		}
 		size = strlen(input);
 		i=0;
 		repeat=0;
@@ -43,6 +47,9 @@ int read_number(){
 		}
 	}while(repeat);
 	num = atoi(input);
+	if(input[0] == '\n'){
+		return -1;
+	}
 	return num;	
 }
 
