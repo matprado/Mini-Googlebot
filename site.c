@@ -53,6 +53,7 @@ SITE *read_file_sites(FILE *fp){
 -O site a ser imprimido;
 */
 void print_site(SITE *S){
+	
 	printf("-----------------------------------------\n");
 	printf("Código: %d\n", S->code);
 	printf("Nome: %s\n", S->name);
@@ -84,7 +85,6 @@ SITE *read_new_site(int code, int relevance){
 	char c; /*OBS: essa variável c existe para pegar os '\n' que sobram do stdin*/
 	printf("Nome(string) = ");
 	scanf("%[^\n]%c", new->name, &c);
-	/*scanf("%d%c", &new->relevance, &c);*/	
 	printf("Link(string) = ");
 	scanf("%[^\n]%c", new->link, &c);
 	printf("Quantas palavras chave?(int) ");
@@ -117,6 +117,11 @@ int site_code(SITE *S){
 	return S->code;
 }
 
+int site_relevance(SITE *S){
+	if(S == NULL) return 0;		
+	return S->relevance;
+}
+
 /*Função new_keyword:
  Adiciona uma palavra-chave no site dado;
 @Parâmetros:
@@ -134,6 +139,7 @@ int new_keyword(SITE *S){
 	}
 	printf("Digite a palavra-chave = ");
 	scanf("%s", S->keywords[S->n_key++]);
+	getchar();
 	return 1;
 }
 
@@ -169,4 +175,38 @@ void save_site(FILE *fp, SITE *S){
 		fseek(fp, -1L, SEEK_CUR);
 	}
 	fprintf(fp, "\n");
+}
+
+
+SITE* keyword_found(SITE* root, char search[51]){
+
+	int count = 0;
+	while(count < root->n_key){
+		if(!(strcmp(root->keywords[count], search))){
+			return root;
+		}
+		count++;
+	}
+	return NULL;
+
+}
+
+char** site_keywords(SITE* s){
+	if(s == NULL) return NULL;
+	char** sites;
+	int i;
+	sites = (char**) malloc(10*sizeof(char*));
+	for( i = 0; i < 10; i++)
+		if(s->keywords[i] != NULL) sites[i] = s->keywords[i];
+	
+	return sites;
+}
+
+int site_nkey(SITE* s){
+	if (s == NULL) return -404;
+	return s->n_key;
+}
+
+char* keyword_to_search(char** keywords, int word){
+	return keywords[word];
 }

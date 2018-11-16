@@ -1,115 +1,237 @@
-#include “avl.h”
+#include <stdio.h>
+#include <stdlib.h>
+#include "avl.h"
+#define ERROR -404
 
-struct no{
-	ITEM *item;
-	struct NO *fesq;
-	struct NO *fdir;
-	int altura;
+/*ESTRUTURA DE DADOS USADA: Lista Encadeada Ordenada*/
+struct node{
+	SITE* site;
+	NODE* left;
+	NODE* right;
+	int height;
 };
 
 struct avl{
-	NO *raiz;
-	int profundiade;
+	NODE* root;
+	int depth;
 };
 
-
-AVL *avl_criar(void){
-	AVL *arvore = (AVL *) malloc(sizeof (AVL));
-	if(arvore != NULL){
-		arvore->raiz = NULL;
-		arvore->profundidade = -1;
+AVL *avl_create(void){
+	AVL *tree = (AVL *) malloc(sizeof (AVL));
+	if(tree != NULL){
+		tree->root = NULL;
+		tree->depth = -1;
 	}
-	return arvore;
+	return tree;
 }
 
-void avl_apagar_aux(NO *raiz){
-	if(raiz != NULL){
-		apagar_avl_aux(raiz->fesq);
-		apagar_avl_aux(raiz->fdir);
-		apagar_item(&(raiz->item));
-		free(raiz);
+AVL* scan_file_avl(FILE* fp, int n_lines){
+	AVL* aux = avl_create(); 
+	SITE* S;
+	int count = 0;
+	while(count < n_lines){
+		S = read_file_sites(fp);
+		if(avl_insert(aux, S)) printf("NOVO SITE INSERIDO COM SUCESSO...\n");
+		count++;
+	}
+	return aux; 
+}
+
+void delete_node_avl(NODE* a){
+	if(a != NULL){
+		free(a->site);
+		a = NULL;
 	}
 }
 
-void avl_apagar(AVL **arvore){
-	avl_apagar_aux((*arvore)->raiz);
-	free(*arvore);
-	*arvore = NULL;
+void delete_avl_aux(NODE *root){
+	if(root != NULL){
+		delete_avl_aux(root->left);
+		delete_avl_aux(root->right);
+		delete_node_avl(root);
+		free(root);
+	}
 }
 
-int avl_altura_no(NO* raiz){
-	if(raiz == NULL){
+void avl_delete(AVL **tree){
+	delete_avl_aux((*tree)->root);
+	free(*tree);
+	*tree = NULL;
+}
+
+int avl_height_node(NODE* root){
+	if(root == NULL){
 		return -1;
 	}else{
-		return raiz->altura;
+		return root->height;
 	}
 }
 
-NO *avl_cria_no(ITEM *item){
-	NO *no = (NO *) malloc(sizeof (NO));
-	if(no != NULL){
-		no->altura = 0;
-		no->fdir = NULL;
-		no->fesq = NULL;
-		no->item = item;
+NODE *avl_create_node(SITE *site){
+	NODE *node = (NODE *) malloc(sizeof (NODE));
+	if(node != NULL){
+		node->height = 0;
+		node->right = NULL;
+		node->left = NULL;
+		node->site = site;
 	}
-	return no;
+	return node;
 }
 
-NO *rodar_direita(NO *a){
-	NO *b = a->fesq;
-	a->fesq = b->fdir;
-	b->fdir = a;
-	a->altura = max(avl_altura_no(a->fesq),avl_altura_no(a->fdir)) + 1;
-	b->altura = max(avl_altura_no(b->fesq),	a->altura) + 1;
+NODE *rotate_right(NODE *a){
+	NODE *b = a->left;
+	a->left = b->right;
+	b->right = a;
+	a->height = max(avl_height_node(a->left),avl_height_node(a->right)) + 1;
+	b->height = max(avl_height_node(b->left),	a->height) + 1;
 	return b;
 }
 
-NO *rodar_esquerda(NO *a){
-	NO *b = a->fdir;
-	a->fdir = b->fesq;
-	b->fesq = a;
-	a->altura = max(avl_altura_no(a->fesq),avl_altura_no(a->fdir)) + 1;
-	b->altura = max(avl_altura_no(b->fdir),	a->altura) + 1;
+NODE *rotate_left(NODE *a){
+	NODE *b = a->right;
+	a->right = b->left;
+	b->left = a;
+	a->height = max(avl_height_node(a->left),avl_height_node(a->right)) + 1;
+	b->height = max(avl_height_node(b->right),	a->height) + 1;
 	return b;
 }
 
-NO *rodar_esquerda_direita(NO *a){
-	a->fesq = rodar_esquerda(a->fesq);
-	return rodar_direita(a);
+NODE *rotate_left_right(NODE *a){
+	a->left = rotate_left(a->left);
+	return rotate_right(a);
 }
 
-NO *rodar_esquerda_direita(NO *a){
-	a->dir = rodar_direita(a->dir);
-	return rodar_esquerda(a);
+NODE *rotate_right_left(NODE *a){
+	a->right = rotate_right(a->right);
+	return rotate_left(a);
 }
 
-NO *avl_inserir_no(NO *raiz, ITEM *item){
-	if(raiz == NULL){
-		raiz = avl_cria_no(item);
-	}else if(item_chave(item) > item_chave(raiz->item)){
-		raiz->fdir = avl_inserir_no(raiz->fdir, item);
-		if(avl_altura_no(raiz->fesq) – avl_altura_no(raiz->fdir) == -2){
-			if(item_chave(item) > item_chave(raiz->fdir->item)){
-				raiz = rodar_esquerda(raiz);
+NODE *avl_insert_node(NODE *root, SITE *site){
+	
+	if(root == NULL){
+		root = avl_create_node(site);
+	}
+	
+	else if(site_code(site) > site_code(root->site)){
+		root->right = avl_insert_node(root->right, site);
+		if(avl_height_node(root->left) - avl_height_node(root->right) == -2){
+			if(site_code(site) > site_code(root->right->site)){
+				root = rotate_left(root);
 			}else{
-				raiz = rodar_direita_esquerda(raiz);
-			}
-		}
-	}else if(item_chave(item->chave) < item_chave(raiz->item)){
-		raiz->fesq = avl_inserir_no(raiz->fesq, item);
-		if(avl_altura_no(raiz->fesq) – avl_altura_no(raiz->fdir) == 2){
-			if(item_chave(item->chave) < item_chave(raiz->fesq->item)){
-				raiz = rodar_direita(raiz);
-			}else{
-				raiz = rodar_esquerda_direita(raiz);
+				root = rotate_right_left(root);
 			}
 		}
 	}
-	raiz->altura = max(avl_altura_no(raiz->fesq),avl_altura_no(raiz->fdir)) + 1;
-	return raiz;
+
+	else if(site_code(site) < site_code(root->site)){
+		root->left = avl_insert_node(root->left, site);
+		if(avl_height_node(root->left) - avl_height_node(root->right) == 2){
+			if(site_code(site) < site_code(root->left->site)){
+				root = rotate_right(root);
+			}else{
+				root = rotate_left_right(root);
+			}
+		}
+	}
+	root->height = max(avl_height_node(root->left),avl_height_node(root->right)) + 1;
+	return root;
 }
 
-int avl_inserir(AVL *arvore, ITEM *item){
-	return (arvore->raiz = avl_inserir_no(arvore->raiz, item)) != NULL;
+NODE* avl_search_code(NODE* root, int code){
+	if(root == NULL) return NULL;
+	if(code == site_code(root->site)) return root;
+	else if(code < site_code(root->site)) return avl_search_code(root->left, code);
+	else return avl_search_code(root->right, code);
+}
+
+NODE* avl_root(AVL* T){
+	if(T == NULL) return NULL;
+	return T->root;
+}
+
+SITE* avl_search(NODE* root, int code){
+	if(root == NULL) return NULL;
+	NODE* aux = avl_search_code(root, code);
+	if(aux == NULL) return NULL;
+	return aux->site;
+}
+
+int avl_insert(AVL *tree, SITE *site){
+	return ((tree->root = avl_insert_node(tree->root, site)) != NULL);
+}
+
+int code_found_avl(AVL* L, int code){
+	if(L == NULL) return 0;
+	return (avl_search_code(L->root, code) != NULL);
+}
+
+int avl_remove(AVL* A, int code){
+	return 1;
+}
+
+void print_tree(NODE* root){
+
+	if(root == NULL) return;
+	print_tree(root->left);
+	print_site(root->site);
+	print_tree(root->right);
+
+}
+
+void avl_print(AVL* A){
+	print_tree(A->root);
+
+}
+
+void tree_search(NODE* root, char search[51], int* flag, LIST* L, SITE* aux){
+
+	if(root == NULL) return;
+	SITE* s = keyword_found(root->site, search);
+	if(s != NULL && site_code(s) != site_code(aux)){
+		/*int verify = list_insertion_relevance(L, s);*/
+		list_insertion_relevance(L, s);
+		*flag = 1;
+	}
+	tree_search(root->left, search, flag, L, aux);
+	tree_search(root->right, search, flag, L, aux);
+
+}
+
+void avl_search_keyword(AVL* A, char search[51]){
+
+	int flag = 0;
+	int suggestion;
+	char** suggested_keywords = NULL;
+	LIST* suggestions = NULL;
+	LIST* L = create_list();
+	tree_search(A->root, search, &flag, L, NULL);
+	print_list(L);
+	if(!flag) printf("Não foram encontrados sites com essa palavra-chave\n");
+	
+	if(flag){	
+		printf("Deseja buscar por sugestoes de sites?\n");
+		printf("0 para Nao\n");
+		printf("1 para Sim\n");
+		scanf("%d", &suggestion);
+		getchar();
+		if(suggestion){
+			suggestions = create_list();
+			int site_pos = 0;
+			while(site_pos < list_size(L)){
+				int word = 0;
+				SITE* aux = list_search_keyword(L, site_pos);
+				while(word < site_nkey(aux)){
+					suggested_keywords = site_keywords(aux);
+					/*printf("%s\n", search);*/
+					if(strcmp(suggested_keywords[word], search)) tree_search(A->root, suggested_keywords[word], &flag, suggestions, aux);
+					free(suggested_keywords);
+					word++;
+				}
+				site_pos++;
+			}
+			print_list(suggestions);
+		}
+	}
+	if(suggestions != NULL) delete_list(suggestions);
+	if(L != NULL) delete_list(L);
 }

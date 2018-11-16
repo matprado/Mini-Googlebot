@@ -54,7 +54,6 @@ void delete_list(LIST *L){
 -Um nó;*/
 void delete_node(NODE *N){
 	if(N != NULL){
-		free(N->site);
 		free(N);
 		N = NULL;
 	}
@@ -77,7 +76,7 @@ LIST* scan_file(FILE* fp, int n_lines){
 }
 
 /*Função list_insertion:
- Insere um novo śite em uma lista;
+ Insere um novo site em uma lista;
 @Parâmetros:
 -Ponteiros para a lista e para o site;
 @Retorno:
@@ -220,4 +219,63 @@ void update_file(FILE *fp, LIST *L){
 			aux = aux->next;
 		}
 	}	
+}
+
+int list_insertion_relevance(LIST *L, SITE *S){ 
+ 	if(L == NULL || S == NULL) return 0;
+	NODE *new = (NODE *) malloc(sizeof(NODE)), *search = NULL, *previous = NULL;		/*
+	search -> nó posicionado onde deveria estar o new;
+	previous -> nó anterior à search		
+	new -> novo nó a ser inserido entre o previous e o search; */
+	NODE* aux = L->start;
+	int check = 0;
+	while(check < L->size){
+		if(site_code(S) == site_code(aux->site))
+			return 1;
+		aux = aux->next;
+		check++;
+	}
+	if(new != NULL){
+		new->site = S;
+		new->next = NULL;
+		if(empty_list(L)){ /*LISTA VAZIA*/
+			L->start = new;
+		}else{
+			search = L->start;
+			while((search != NULL) && (site_relevance(search->site) > site_relevance(new->site))){
+				previous = search;
+				search = search->next; /*previous recebe o nó anterior de search*/
+			}
+			if(search == L->start){ /*CASO PARTICULAR: inserir como primeiro elemento*/
+				new->next = search;
+				L->start = new;
+			}
+			else{
+				new->next = previous->next;
+				previous->next = new;
+			}
+		}
+		L->size++;
+		return 1;
+	}
+	return 0;
+}
+
+SITE* list_search_keyword(LIST* L, int place){
+
+	NODE* aux = L->start;
+	int position = 0;
+	while(position < place){
+		aux = aux->next;
+		position++;
+	}
+	return aux->site;
+
+}
+
+int list_size(LIST* L){
+	if(L != NULL){
+		return L->size;
+	}
+	return 0;
 }
