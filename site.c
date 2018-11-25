@@ -8,7 +8,6 @@ struct site{
 	char name[51]; /*nome*/
 	int relevance; /*relevancia*/
 	char link[101]; /*link*/
-	/*char keywords[10][51];*/ /*palavras-chave*/
 	AVL *keywords_tree; /*árvore de palavras-chave*/
 	int n_key; /*quantidade de palavras chave*/
 };
@@ -69,11 +68,6 @@ void print_site(SITE *S){
 	printf("Link: %s\n", S->link);
 	printf("Palavras-chave:\n");
 	avl_print(S->keywords_tree);
-	/*
-	int i;
-	for(i=0; i<S->n_key; i++){
-		printf("Palavra-chave %d: %s\n", i+1,S->keywords[i]);
-	}*/
 	printf("------------------------------------------\n");
 }
 
