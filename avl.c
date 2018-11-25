@@ -4,7 +4,6 @@
 #include "avl.h"
 #define ERROR -404
 
-/*ESTRUTURA DE DADOS USADA: Lista Encadeada Ordenada*/
 struct node{
 	char *keyword;
 	NODE* left;
