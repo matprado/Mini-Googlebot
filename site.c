@@ -8,7 +8,8 @@ struct site{
 	char name[51]; /*nome*/
 	int relevance; /*relevancia*/
 	char link[101]; /*link*/
-	char keywords[10][51]; /*palavras-chave*/
+	/*char keywords[10][51];*/ /*palavras-chave*/
+	AVL *keywords_tree; /*árvore de palavras-chave*/
 	int n_key; /*quantidade de palavras chave*/
 };
 
@@ -23,6 +24,7 @@ SITE* create_site(void){
 		new->code = 0; 
 		new->relevance = 0;
 		new->n_key = 0;
+		new->keywords_tree = NULL;
 	}
 	return new;
 }
@@ -40,9 +42,16 @@ SITE *read_file_sites(FILE *fp){
 	fscanf(fp, "%d%c%[^,]%c%d%c%[^,]", &S->code, &c, S->name, &c, &S->relevance, &c,  S->link);
 	c = fgetc(fp);
 	/*Lê todas as palavras-chave até que chegue em um \n. Ao mesmo tempo, incrementa a quantidade de palavras-chave*/
+	S->keywords_tree = avl_create();
+	char keyword[51];
 	while((c = fgetc(fp)) != '\n'){
 		if(c != ',') fseek(fp, -1L, SEEK_CUR);
-		fscanf(fp,"%[a-zA-Z]", S->keywords[S->n_key++]);
+		fscanf(fp,"%[a-zA-Z]", keyword);
+		keyword[strlen(keyword)] = '\0';
+		/*printf("sdaas %s\n", keyword);*/
+		avl_insert(S->keywords_tree, keyword);
+		keyword[0] = '\0';
+		S->n_key++;
 	}
 	return S;
 }
@@ -53,16 +62,18 @@ SITE *read_file_sites(FILE *fp){
 -O site a ser imprimido;
 */
 void print_site(SITE *S){
-	
 	printf("-----------------------------------------\n");
 	printf("Código: %d\n", S->code);
 	printf("Nome: %s\n", S->name);
 	printf("Relevância: %d\n", S->relevance);
 	printf("Link: %s\n", S->link);
+	printf("Palavras-chave:\n");
+	avl_print(S->keywords_tree);
+	/*
 	int i;
 	for(i=0; i<S->n_key; i++){
 		printf("Palavra-chave %d: %s\n", i+1,S->keywords[i]);
-	}
+	}*/
 	printf("------------------------------------------\n");
 }
 
@@ -99,9 +110,14 @@ SITE *read_new_site(int code, int relevance){
 	c = getchar();
 	/*Lê cada palavra chave:*/
 	int i;
+	char keyword[51];
+	new->keywords_tree = avl_create();
 	for(i=0; i<new->n_key; i++){
 		printf("Palavra-chave(string) número %d = ", i+1);
-		scanf("%s%c", new->keywords[i], &c);
+		scanf("%s%c", keyword, &c);
+		keyword[strlen(keyword)] = '\0';
+		avl_insert(new->keywords_tree, keyword);
+		keyword[0] = '\0';
 	}
 	return new;
 }
@@ -115,11 +131,6 @@ SITE *read_new_site(int code, int relevance){
 int site_code(SITE *S){
 	if(S == NULL) return 0;		
 	return S->code;
-}
-
-int site_relevance(SITE *S){
-	if(S == NULL) return 0;		
-	return S->relevance;
 }
 
 /*Função new_keyword:
@@ -138,7 +149,10 @@ int new_keyword(SITE *S){
 		return 0;
 	}
 	printf("Digite a palavra-chave = ");
-	scanf("%s", S->keywords[S->n_key++]);
+	char keyword[51];
+	scanf("%s", keyword);
+	avl_insert(S->keywords_tree, keyword);
+	S->n_key++;
 	getchar();
 	return 1;
 }
@@ -169,7 +183,7 @@ void save_site(FILE *fp, SITE *S){
 	fprintf(fp, "%d,%s,%d,%s,", S->code, S->name, S->relevance, S->link);
 	int i;
 	for(i=0; i<S->n_key; i++){
-		fprintf(fp, "%s,", S->keywords[i]);
+		avl_save(S->keywords_tree, fp);
 	}
 	if(S->n_key != 0){
 		fseek(fp, -1L, SEEK_CUR);
@@ -177,36 +191,43 @@ void save_site(FILE *fp, SITE *S){
 	fprintf(fp, "\n");
 }
 
-
-SITE* keyword_found(SITE* root, char search[51]){
-
-	int count = 0;
-	while(count < root->n_key){
-		if(!(strcmp(root->keywords[count], search))){
-			return root;
-		}
-		count++;
+void delete_site(SITE *S){
+	if(S != NULL){
+		avl_delete(&(S->keywords_tree));
+		free(S);
+		S = NULL;
 	}
-	return NULL;
-
 }
 
-char** site_keywords(SITE* s){
-	if(s == NULL) return NULL;
-	char** sites;
-	int i;
-	sites = (char**) malloc(10*sizeof(char*));
-	for( i = 0; i < 10; i++)
-		if(s->keywords[i] != NULL) sites[i] = s->keywords[i];
-	
-	return sites;
+int keyword_found(SITE *S, char keyword[51]){
+	if(S != NULL){
+		if(avl_search(S->keywords_tree, keyword)) return 1;	
+	}
+	return 0;	
 }
 
-int site_nkey(SITE* s){
-	if (s == NULL) return -404;
-	return s->n_key;
+void print_search(SITE *S){
+	printf("-----------------------------------------\n");
+	printf("---\t %s \t---\n", S->name);
+	printf("%s\n", S->link);
+	printf("%d\n", S->relevance);
+	printf("------------------------------------------\n");
 }
 
-char* keyword_to_search(char** keywords, int word){
-	return keywords[word];
+char** site_keywords(SITE* S){
+	if(S == NULL) return NULL;
+	char** keywords;
+	keywords = (char**) malloc(S->n_key * sizeof(char*));
+	avl_copy_keywords(S->keywords_tree, keywords);
+	return keywords;
+}
+
+int site_nkey(SITE* S){
+	if (S == NULL) return -404;
+	return S->n_key;
+}
+
+int site_relevance(SITE *S){
+	if(S == NULL) return 0;		
+	return S->relevance;
 }
