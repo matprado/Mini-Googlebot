@@ -66,13 +66,15 @@ void print_intro(){
  Imprime um menu de escolhas;*/
 void print_menu(){
 	printf("------------------------------------------\n");	
-	printf("Opção 1: Inserir um site;\n");
-	printf("Opção 2: Remover um site;\n");
-	printf("Opção 3: Inserir palavra-chave;\n");
-	printf("Opção 4: Atualizar relevância;\n");
-	printf("Opção 5: Sair;\n");
-	printf("Opção 6: Mostrar sites;\n");
-	printf("Opção 7: Buscar uma palavra-chave;\n");
+	printf("Opção 1: Sugestão de sites;\n");
+	printf("Opção 2: Buscar por palavra-chave;\n");
+	printf("Opção 3: Mostrar todos os sites;\n");
+	printf("Opção 4: Sair;\n");
+	printf("Opção 5: Inserir um site;\n");
+	printf("Opção 6: Remover um site;\n");
+	printf("Opção 7: Inserir palavra-chave;\n");
+	printf("Opção 8: Atualizar relevância;\n");
+	/*printf("Opção 9: Remover palavra-chave;\n");*/	
 	printf("------------------------------------------\n");		
 }
 
@@ -148,7 +150,7 @@ void update_relevance(LIST *L){
 		if(change_relevance(list_search(L, code), relevance)) printf("Relevância atualizada com sucesso!\n"); 	
 	}	
 }
-
+/*
 int wanna_suggestion(){
 	printf("Deseja uma sugestão de sites relacionados à busca?\n");
 	int op = 2;
@@ -157,7 +159,7 @@ int wanna_suggestion(){
 		op = read_number();
 	}
 	return op;
-}
+}*/
 
 void keyword_search(LIST *L){
 	printf("Você escolheu buscar por palavra-chave.\n");
@@ -168,9 +170,18 @@ void keyword_search(LIST *L){
 	keyword[strlen(keyword)] = '\0';
 	LIST *search_list = list_keyword_search(L, keyword);
 	if(search_list != NULL){
-		if(wanna_suggestion()) list_suggestions(L, search_list);
-		else delete_aux_list(search_list);
-	}	
+		delete_aux_list(search_list);
+	}
+}
+
+void site_suggestions(LIST *L){
+	printf("Você escolheu uma sugestão de sites relacionados a uma palavra-chave.\n");
+	printf("Digite a palavra-chave: ");
+	char keyword[51];
+	char c;
+	scanf("%[^\n]%c", keyword, &c);
+	keyword[strlen(keyword)] = '\0';
+	list_suggestions(L, keyword);	
 }
 
 int main(void){
@@ -192,22 +203,24 @@ int main(void){
 		print_menu();
 		opc = read_number();
 		switch(opc){
-			case 1: insert_site(L);
+			case 1: site_suggestions(L);
 				break;	
-			case 2:	remove_site(L);
+			case 2:	keyword_search(L);
 				break;
-			case 3:	insert_keyword(L);
-				break;
-			case 4:	update_relevance(L);	
-				break;						
-			case 5: printf("Encerrando execução...\n");
-				break;
-			case 6:	
-				printf("Você escolheu ver todos os sites:\n");
+			case 3:	
+				printf("Você escolheu ver todos os sites:\n");	
 				print_list(L);
+				break;
+			case 4:	printf("Encerrando execução...\n");
+				break;						
+			case 5: insert_site(L);
+				break;	
+			case 6:	remove_site(L);
 				break;		
-			case 7: keyword_search(L);
-				break;		
+			case 7: insert_keyword(L);
+				break;
+			case 8: update_relevance(L);	
+				break;
 			default: printf("ERRO --> OPÇÃO INVÁLIDA.\nPor favor, digite uma das opções apresentadas:\n");
 		}
 	}

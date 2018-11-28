@@ -233,6 +233,8 @@ LIST *list_keyword_search(LIST* L, char keyword[51]){
 	if(!print_search_list(search_list)){
 		printf("Não foram encontrados sites com essa palavra-chave\n");
 		delete_aux_list(search_list);
+		free(search_list);
+		return NULL;
 	}
 	return search_list;
 }
@@ -260,8 +262,7 @@ void list_suggestions(LIST *L, LIST *search_list){
 		sec = L->start;
 		while(sec != NULL){
 			for(i = 0; i < site_nkey(aux->site); i++){
-				printf("dd %s\n", related_keywords[site_counter][i]);
-				/*SE NÃO QUERER REPETIR, MUDA AQUI*/
+				/*SE NÃO QUISER REPETIR, MUDA AQUI*/
 				if(keyword_found(sec->site, related_keywords[site_counter][i])) list_relevance_insertion(sug_list, sec->site);
 			}	
 			sec = sec->next;
