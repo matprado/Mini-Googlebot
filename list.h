@@ -20,7 +20,7 @@ int code_found(LIST *L, int code);
 void update_file(FILE *fp, LIST *L);
 LIST *list_keyword_search(LIST* L, char keyword[51]);
 int print_search_list(LIST *L);
-void list_suggestions(LIST *L, LIST *search_list);
+void list_suggestions(LIST *L, char *keyword);
 int list_relevance_insertion(LIST *L, SITE *S);
 void delete_aux_list(LIST *L);
 

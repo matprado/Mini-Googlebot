@@ -175,16 +175,17 @@ int change_relevance(SITE *S, int relevance){
 -Um ponteiro para arquivo e um para site;*/
 void save_site(FILE *fp, SITE *S){
 	fprintf(fp, "%d,%s,%d,%s,", S->code, S->name, S->relevance, S->link);
-	int i;
-	for(i=0; i<S->n_key; i++){
-		avl_save(S->keywords_tree, fp);
-	}
+	avl_save(S->keywords_tree, fp);
 	if(S->n_key != 0){
 		fseek(fp, -1L, SEEK_CUR);
 	}
 	fprintf(fp, "\n");
 }
 
+/*Função delete_site:
+ Deleta um site;
+@Parâmetros:
+-Um ponteiro para um site;*/
 void delete_site(SITE *S){
 	if(S != NULL){
 		avl_delete(&(S->keywords_tree));
@@ -193,6 +194,13 @@ void delete_site(SITE *S){
 	}
 }
 
+/*Função keyword_found:
+ Procura uma palavra-chave em um site;
+@Parâmetros:
+-Um ponteiro para o site;
+-A palavra-chave;
+@Retorno:
+-Se bem sucedida, retorna 1. Caso contrário, retorna 0;*/
 int keyword_found(SITE *S, char keyword[51]){
 	if(S != NULL){
 		if(avl_search(S->keywords_tree, keyword)) return 1;	
@@ -200,14 +208,23 @@ int keyword_found(SITE *S, char keyword[51]){
 	return 0;	
 }
 
+/*Função print_search:
+ Imprime um site em forma de busca;
+@Parâmetros:
+-Um ponteiro para um site;*/
 void print_search(SITE *S){
-	printf("-----------------------------------------\n");
-	printf("---\t %s \t---\n", S->name);
+	printf("------------------------------------------\n");
+	printf("---\t%s\t---\n", S->name);
 	printf("%s\n", S->link);
-	printf("%d\n", S->relevance);
 	printf("------------------------------------------\n");
 }
 
+/*Função site_keywords:
+ Retorna as palavras-chave de um site;
+@Parâmetros:
+-Um ponteiro para um site;
+@Retorno:
+-A palavra-chave;*/
 char** site_keywords(SITE* S){
 	if(S == NULL) return NULL;
 	char** keywords;
@@ -216,11 +233,23 @@ char** site_keywords(SITE* S){
 	return keywords;
 }
 
+/*Função site_nkey:
+ Retorna o número de palavras-chave de um site;
+@Parâmetros:
+-Um ponteiro para um site;
+@Retorno:
+-O número de palavras-chave do site;*/
 int site_nkey(SITE* S){
 	if (S == NULL) return -404;
 	return S->n_key;
 }
 
+/*Função site_relevance:
+ Retorna a relevância de um site;
+@Parâmetros:
+-Um ponteiro para um site;
+@Retorno:
+-A relevância do site;*/
 int site_relevance(SITE *S){
 	if(S == NULL) return 0;		
 	return S->relevance;

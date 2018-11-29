@@ -222,6 +222,12 @@ void update_file(FILE *fp, LIST *L){
 	}	
 }
 
+/*Função list_keyword_search:
+@Parâmetros:
+-Um ponteiro para uma lista;
+-Uma palavra-chave;
+@Retorno:
+-Se encontrar um site com o código dado, retorna 1. Caso contrário, retorna 0;*/
 LIST *list_keyword_search(LIST* L, char keyword[51]){
 	if(L == NULL) return NULL;
 	LIST* search_list = create_list();
@@ -230,15 +236,15 @@ LIST *list_keyword_search(LIST* L, char keyword[51]){
 		if(keyword_found(aux->site, keyword)) list_relevance_insertion(search_list, aux->site);
 		aux = aux->next;
 	}
-	if(!print_search_list(search_list)){
-		printf("Não foram encontrados sites com essa palavra-chave\n");
-		delete_aux_list(search_list);
-		free(search_list);
-		return NULL;
-	}
 	return search_list;
 }
 
+/*Função print_search_list:
+ Imprime a lista de sites em formato de busca;	
+@Parâmetros:
+-Um ponteiro para uma lista;
+@Retorno:
+-Retorna 1 caso consiga imprimir com sucesso*/
 int print_search_list(LIST *L){
 	if(empty_list(L)) return 0;
 	NODE *aux = NULL;
@@ -252,50 +258,68 @@ int print_search_list(LIST *L){
 	return 1;
 }
 
-void list_suggestions(LIST *L, LIST *search_list){
-	LIST *sug_list = create_list();
-	char ***related_keywords = (char ***) malloc(search_list->size * sizeof(char **));
+/*Função list_suggestions:
+ Procura sites com uma certa palavra-chave e, a partir das palavras-chave desses sites, procura novamente guardando em uma
+lista ordenada por relevância. Após isso, imprime o resultado final;	
+@Parâmetros:
+-Um ponteiro para uma lista;
+-Uma palavra-chave;*/
+void list_suggestions(LIST *L, char *keyword){
+	LIST *search_list = list_keyword_search(L, keyword);
+	LIST *sug_list;
+	char ***related_keywords;
 	int site_counter = 0, i = 0;
-	NODE *aux = search_list->start, *sec;
-	while(aux != NULL){
-		related_keywords[site_counter] = site_keywords(aux->site);
-		sec = L->start;
-		while(sec != NULL){
-			for(i = 0; i < site_nkey(aux->site); i++){
-				/*SE NÃO QUISER REPETIR, MUDA AQUI*/
-				if(keyword_found(sec->site, related_keywords[site_counter][i])) list_relevance_insertion(sug_list, sec->site);
+	if(!empty_list(search_list)){
+		sug_list = create_list();
+		related_keywords = (char ***) malloc(search_list->size * sizeof(char **));
+		NODE *aux = search_list->start, *sec;
+		while(aux != NULL){
+			related_keywords[site_counter] = site_keywords(aux->site);
+			sec = L->start;
+			while(sec != NULL){
+				for(i = 0; i < site_nkey(aux->site); i++){
+					if(keyword_found(sec->site, related_keywords[site_counter][i]))
+						list_relevance_insertion(sug_list, sec->site);
+				}	
+				sec = sec->next;
 			}	
-			sec = sec->next;
-		}	
-		aux = aux->next;
-		site_counter++;
-	}
-	if(!print_search_list(sug_list)) printf("Não há sites sugeridos.\n");
-	int a, b;
-	aux = search_list->start;
-	for(a = 0; a < search_list->size; a++){
-		for(b = 0; b < site_nkey(aux->site); b++){
-			free(related_keywords[a][b]);
+			aux = aux->next;
+			site_counter++;
 		}
-		free(related_keywords[a]);
-		aux = aux->next;
-	}
-	free(related_keywords);
-	if(sug_list != NULL) delete_aux_list(sug_list);
+		if(!print_search_list(sug_list)) printf("Não há sites sugeridos.\n");
+		int a, b;
+		aux = search_list->start;
+		for(a = 0; a < search_list->size; a++){
+			for(b = 0; b < site_nkey(aux->site); b++){
+				free(related_keywords[a][b]);
+			}
+			free(related_keywords[a]);
+			aux = aux->next;
+		}
+		free(related_keywords);
+		if(sug_list != NULL) delete_aux_list(sug_list);
+	}else printf("Não há sites sugeridos.\n");	
 	if(search_list != NULL) delete_aux_list(search_list);
 }
 
+/*Função list_relevance_insertion:
+ Insere um site em uma lista ordenando por relevância;
+@Parâmetros:
+-Um ponteiro para uma lista;
+-Um ponteiro para site;
+@Retorno:
+-retorna 1 caso insira com sucesso;*/
 int list_relevance_insertion(LIST *L, SITE *S){
 	if(L == NULL || S == NULL) return 0;
 	NODE *new = NULL, *search = NULL, *previous = NULL;
 	/*CHECAR SE O SITE JÁ EXISTE NA LISTA*/
 	NODE* aux = L->start;
-	int check = 0;
-	while(check < L->size){
+	while(aux != NULL){
 		if(site_code(S) == site_code(aux->site))
 			return 1;
+		if(site_relevance(S) > site_relevance(aux->site))
+			break;
 		aux = aux->next;
-		check++;
 	}
 	/*
 	search -> nó posicionado onde deveria estar o new;
@@ -328,17 +352,22 @@ int list_relevance_insertion(LIST *L, SITE *S){
 	return 0;
 }
 
+/*Função delete_aux_list:
+ Deleta uma lista auxiliar, mas sem deletar os sites em si.(esses ficam armazenados na lista original);
+@Parâmetros:
+-Um ponteiro para uma lista;*/
 void delete_aux_list(LIST *L){
-	if(L != NULL && !empty_list(L)){
-   		NODE *N = L->start, *aux;
-    	while(N != NULL){
-       	 	aux = N;
-       	 	N = N->next;
-        	free(aux);
-        	aux=NULL;
-        }
-    	L->start = NULL;
-    	free(L);
+	if(empty_list(L)) free(L);
+	else{
+		NODE *N = L->start, *aux;
+		while(N != NULL){
+	   	 	aux = N;
+	   	 	N = N->next;
+	    	free(aux);
+	    	aux=NULL;
+	    }
+		L->start = NULL;
+		free(L);
 		L = NULL;
-	}
+	}	
 }

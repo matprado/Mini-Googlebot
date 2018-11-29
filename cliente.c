@@ -4,6 +4,55 @@
 #include "list.h"
 #include "site.h"
 
+int count_lines(FILE* file);
+int read_number();
+void print_intro();
+void print_menu();
+void insert_site(LIST *L);
+void remove_site(LIST *L);
+void insert_keyword(LIST *L);
+void update_relevance(LIST *L);
+void keyword_search(LIST *L);
+void site_suggestions(LIST *L);
+int load_sites(LIST **L, FILE **fp);
+int save_sites(LIST *L, FILE *fp);
+
+int main(void){
+	FILE* fp = NULL;
+	LIST *L = NULL;
+	if(!load_sites(&L, &fp)) return 0;
+	int opc = 0;
+	print_intro();
+	while(opc != 4){	
+		print_menu();
+		opc = read_number();
+		switch(opc){
+			case 1: site_suggestions(L);
+				break;	
+			case 2:	keyword_search(L);
+				break;
+			case 3:	
+				printf("Você escolheu ver todos os sites:\n");	
+				print_list(L);
+				break;
+			case 4:	printf("Encerrando execução...\n");
+				break;						
+			case 5: insert_site(L);
+				break;	
+			case 6:	remove_site(L);
+				break;		
+			case 7: insert_keyword(L);
+				break;
+			case 8: update_relevance(L);	
+				break;
+			default: printf("ERRO --> OPÇÃO INVÁLIDA.\nPor favor, digite uma das opções apresentadas:\n");
+		}
+	}
+	if(!save_sites(L, fp)) return 0;
+	printf("FIM DA EXECUÇÃO.\n");
+	return 0;
+}
+
 /*Função count_lines:
  Conta o numero de linhas de um arquivo;
 @Parâmetros:
@@ -150,17 +199,11 @@ void update_relevance(LIST *L){
 		if(change_relevance(list_search(L, code), relevance)) printf("Relevância atualizada com sucesso!\n"); 	
 	}	
 }
-/*
-int wanna_suggestion(){
-	printf("Deseja uma sugestão de sites relacionados à busca?\n");
-	int op = 2;
-	while(op != 0 && op != 1){
-		printf("Digite < 1 > para sim ou < 0 > para não:\n");
-		op = read_number();
-	}
-	return op;
-}*/
 
+/*Função keyword_search():
+ Faz uma busca por uma palavra-chave;
+@Parâmetros:
+-Um ponteiro para lista;*/
 void keyword_search(LIST *L){
 	printf("Você escolheu buscar por palavra-chave.\n");
 	printf("Digite a palavra-chave a ser buscada: ");
@@ -169,11 +212,16 @@ void keyword_search(LIST *L){
 	scanf("%[^\n]%c", keyword, &c);
 	keyword[strlen(keyword)] = '\0';
 	LIST *search_list = list_keyword_search(L, keyword);
-	if(search_list != NULL){
-		delete_aux_list(search_list);
+	if(!print_search_list(search_list)){
+		printf("Não foram encontrados sites com essa palavra-chave\n");
 	}
+	delete_aux_list(search_list);
 }
 
+/*Função site_suggestions:
+ Faz uma sugestão de site a partir de uma palavra-chave;
+@Parâmetros:
+-Um ponteiro para lista;*/
 void site_suggestions(LIST *L){
 	printf("Você escolheu uma sugestão de sites relacionados a uma palavra-chave.\n");
 	printf("Digite a palavra-chave: ");
@@ -184,58 +232,42 @@ void site_suggestions(LIST *L){
 	list_suggestions(L, keyword);	
 }
 
-int main(void){
-	FILE* fp; /*ponteiro para arquivo*/
+/*Função load_sites:
+ Lê o arquivo inicializando a lista com os sites;
+@Parâmetros:
+-Um ponteiro para lista;
+-Um ponteiro para arquivo;*/
+int load_sites(LIST **L, FILE **fp){
 	int n_lines; /*variavel que armazena o numero de linhas do arquivo*/
-	LIST* L = NULL;
-	if((fp = fopen("googlebot.txt", "r")) == NULL){ /*abre o arquivo googlebot.txt em modo leitura*/
+	if(((*fp) = fopen("googlebot.txt", "r")) == NULL){ /*abre o arquivo googlebot.txt em modo leitura*/
 		printf("ERRO AO ABRIR ARQUIVO DE LEITURA.\n");
 		return 0;
 	}
 	printf("Arquivo de leitura aberto...\n");
-	n_lines = count_lines(fp); /*conta as linhas*/
-	rewind(fp); /*volta ao inicio do arquivo*/
-	L = scan_file(fp, n_lines); /*le o arquivo*/
+	n_lines = count_lines(*fp); /*conta as linhas*/
+	rewind(*fp); /*volta ao inicio do arquivo*/
+	(*L) = scan_file(*fp, n_lines); /*le o arquivo*/
 	printf("Arquivo de leitura lido com sucesso...\n");
-	int opc = 0;
-	print_intro();
-	while(opc != 5){	
-		print_menu();
-		opc = read_number();
-		switch(opc){
-			case 1: site_suggestions(L);
-				break;	
-			case 2:	keyword_search(L);
-				break;
-			case 3:	
-				printf("Você escolheu ver todos os sites:\n");	
-				print_list(L);
-				break;
-			case 4:	printf("Encerrando execução...\n");
-				break;						
-			case 5: insert_site(L);
-				break;	
-			case 6:	remove_site(L);
-				break;		
-			case 7: insert_keyword(L);
-				break;
-			case 8: update_relevance(L);	
-				break;
-			default: printf("ERRO --> OPÇÃO INVÁLIDA.\nPor favor, digite uma das opções apresentadas:\n");
-		}
-	}
+	return 1;
+}
+
+/*Função save_sites:
+ Salva em um arquivo todos os sites armazenados e depois libera a lista da memória heap;
+@Parâmetros:
+-Um ponteiro para lista;
+-Um ponteiro para arquivo;*/
+int save_sites(LIST *L, FILE *fp){
 	/*Guarda os dados de volta no arquivo:*/
 	fclose(fp);
-	/*if((fp = fopen("googlebot.txt", "w+")) == NULL){*/ /*abre o arquivo googlebot.txt em modo escrita*/
-	/*	printf("ERRO AO ESCREVER NO ARQUIVO DE SAÍDA.\n");
+	if((fp = fopen("googlebot.txt", "w+")) == NULL){ /*abre o arquivo googlebot.txt em modo escrita*/
+		printf("ERRO AO ESCREVER NO ARQUIVO DE SAÍDA.\n");
 		return 0;
-	}*/
+	}
 	printf("Armazenando dados no arquivo...\n");
-	/*update_file(fp, L);*/
+	update_file(fp, L);
 	printf("Dados armazenados com sucesso!\n");
 	printf("Liberando dados e fechando arquivo...\n");
 	delete_list(L);
-	/*fclose(fp);*/
-	printf("FIM DA EXECUÇÃO.\n");
-	return 0;
+	fclose(fp);
+	return 1;
 }

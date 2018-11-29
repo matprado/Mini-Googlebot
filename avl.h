@@ -27,8 +27,6 @@ int avl_search(AVL *tree, char keyword[51]);
 int avl_search_aux(NODE *root, char keyword[51]);
 void avl_copy_keywords(AVL *tree, char **keywords);
 void avl_copy_aux(NODE *root, char **keywords, int *i);
-/*int avl_remove(NODE *root, NODE *rem, NODE *prev, int code);
-void change_left_max(NODE *aux, NODE *rem, NODE *prev);*/
 
 
 #endif
