@@ -1,1 +1,56 @@
-# ALG1
+# Projeto – Mini Googlebot (Parte II).
+Alunos: Mateus Ferreira Gomes(10734773), Michelle Wingter da Silva(10783243), Mateus Prado Santos(10851707)
+Compilador: gcc -ansi -Wall -lm
+Plataforma: Linux
+
+*Instruçoes para o uso do programa:
+    O programa apresenta um menu de escolhas onde o usuário possui as seguintes opções de escolha:
+1- Realiza sugestões de sites conforme uma palavra-chave;
+2- Busca por uma palavra-chave;
+3- Imprimir todos os sites com suas respectivas informações;
+4- Sair do programa;
+5- Inserir um site novo informando suas características;
+6- Remover um site ao informar seu código;
+7- Inserir palavra-chave em um site;
+8- Atualizar a relevância de um site;
+
+*Justificativas para escolha da estrutura de dados: 
+    Neste projeto, mantivemos a lista ordenada encadeada para armazenar os sites e trocamos a estrutura para armazenar palavras-chave de cada site que era antes um vetor estático e agora é uma árvore AVL.
+    Listas encadeadas auxiliares ordenadas por relevância foram utilizadas para armazenar, temporariamente, os sites nas buscas; 
+	
+    As justificativas para as escolhas são:
+
+1- Como a operação mais importante em um GoogleBot é a busca por palavras-chave sugerindo sites, uma estrutura de Árvore AVL é a escolha perfeita para armazenar essas palavras pois permite uma busca extremamente eficiente em tempo log(n) na base 2 (nesse caso, no máximo log(10), aproximadamente 3) e não há muitas rotações por cada site conter, no máximo, 10 palavras-chave;
+
+2- Como, ao buscar palavras-chave, teremos que passar por todos os sites, então não vimos necessidade em trocar a Lista encadeada ordenada para armazenar os sites que utilizamos na primeira parte do projeto;    
+
+3- A inserção é ordenada pois, como o programa deve armazenar novos sites em tempo de execução, é mais viável que os novos sites inseridos na lista entrem de forma ordenada.
+
+4- Havendo uma quantidade massiva de buscas, a busca com log(n) é muito mais eficiente, assintoticamente, que uma busca sequencial O(n), que aconteceria em um vetor de palavras-chave;
+
+*Eficiencia de Tempo:
+	
+    Sabemos que, ao buscar por uma palavra-chave, teremos que procurar em todos os elementos da lista, portanto, para n sites, teremos eficiencia n até encontrá-lo. Somado a isso, para buscar entre as palavras-chave de um determinado site teremos que usar a Árvore AVL com no máximo 10 nós, portanto, no pior caso, uma eficiencia log(2)10 (aprox. 4)
+
+	Com isso, para realizar a busca de sites (operacão 2 do menu) teremos uma eficiencia de O(4n), sendo n o numero de sites;
+			
+	Ao realizar a sugestão, monta-se uma lista de sites que foram buscados com as palavras-chave dos encontrados na primeira busca(k sites que possuem a palavra-chave inicial), para isso, teremos que procurar por todas as palavras-chave dos demais	(menos aquela na qual ja foi procurada). Para isso, temos 4n para a busca e 10*k*4n para a sugestão. Assim, em todo o processo, a eficiencia é de 4n + 10*k*4n (operação 1 - sugestão de sites, no pior caso).
+
+	Portanto, a operacão de sugestão é O(4n + 40kn) = O(kn) de eficiencia de tempo, ou seja, depende bastante de quantos sites possuem a palavra-chave buscada inicialmente;
+
+*Algumas observações sobre o código:  
+
+1-Em momentos onde o usuário deve digitar um número inteiro, se o mesmo digitar algo que não seja um número, será requisitado para que digite novamente. Isso foi feito para evitar problemas na execução do programa que causariam vazamento de memória.
+
+2-Adicionamos um recurso a mais no projeto onde o programa, ao finalizar sua execução, guarda de volta todos os dados no arquivo googlebot.
+   
+3-Para que o programa funcione corretamente, é necessário um arquivo googlebot.txt em sua pasta.
+
+4-Há também um arquivo Makefile que pode facilitar a compilação do programa.
+
+OBS: para o programa ler o arquivo googlebot corretamente, o texto do arquivo deve terminar com um '\n'. Exemplo:
+0001,YouTube,900,https://www.youtube.com/,youtube,videos,online\n
+0002,Netflix,800, https://www.netflix.com/br/,netflix,videos,streaming\n
+
+Também é importante dizer que, quando um site não possui palavras-chave, ele termina com uma virgula. Exemplo:
+0001,YouTube,900,https://www.youtube.com/,\n
