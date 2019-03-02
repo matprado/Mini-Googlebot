@@ -122,8 +122,7 @@ void print_menu(){
 	printf("Opção 5: Inserir um site;\n");
 	printf("Opção 6: Remover um site;\n");
 	printf("Opção 7: Inserir palavra-chave;\n");
-	printf("Opção 8: Atualizar relevância;\n");
-	/*printf("Opção 9: Remover palavra-chave;\n");*/	
+	printf("Opção 8: Atualizar relevância;\n");	
 	printf("------------------------------------------\n");		
 }
 
